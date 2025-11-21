@@ -1,0 +1,26 @@
+[
+  {
+    "id": "lp-notes-plus",
+    "label": "Notes+",
+    "description": "Enhanced notes with pinned pages and colour tags.",
+    "icon": "/icons/delta/notes-plus.png",
+    "zipPath": "/apps/notes-plus.zip",
+    "category": "Productivity"
+  },
+  {
+    "id": "lp-prank-tools",
+    "label": "Prank Tools",
+    "description": "Utilities for scripting prank call flows and logging results.",
+    "icon": "/icons/delta/prank-tools.png",
+    "zipPath": "/apps/prank-tools.zip",
+    "category": "Tools"
+  },
+  {
+    "id": "lp-toto-gallery",
+    "label": "Toto Gallery",
+    "description": "A cosy gallery just for Toto photos and little affirmations.",
+    "icon": "/icons/delta/toto-gallery.png",
+    "zipPath": "/apps/toto-gallery.zip",
+    "category": "Lifestyle"
+  }
+]
