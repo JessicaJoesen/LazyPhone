@@ -4,6 +4,7 @@ import { Onboarding } from "./components/onboarding/Onboarding";
 import { HomeScreen } from "./components/home/HomeScreen";
 import { getCurrentUser, setUserOnboarded } from "./services/userService";
 import { usePersistentState } from "./hooks/usePersistentState";
+import type { InstalledApp } from "./services/appStoreService";
 
 export type LazyUser = {
   id: string;
@@ -22,6 +23,10 @@ const App: React.FC = () => {
   const [theme, setTheme] = usePersistentState<Theme>("lazyphone_theme", "dark");
   const [iconAssignments, setIconAssignments] =
     usePersistentState<IconAssignments>("lazyphone_icon_assignments", {});
+  const [installedApps, setInstalledApps] = usePersistentState<InstalledApp[]>(
+    "lazyphone_installed_apps_v1",
+    []
+  );
 
   useEffect(() => {
     const existing = getCurrentUser();
@@ -57,6 +62,8 @@ const App: React.FC = () => {
         onThemeChange={setTheme}
         iconAssignments={iconAssignments}
         onIconAssignmentsChange={setIconAssignments}
+        installedApps={installedApps}
+        onInstalledAppsChange={setInstalledApps}
       />
     );
 

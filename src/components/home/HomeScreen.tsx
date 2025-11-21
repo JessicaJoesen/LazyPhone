@@ -3,8 +3,10 @@ import type { LazyUser, Theme, IconAssignments } from "../../App";
 import { AppIcon } from "./AppIcon";
 import { Dock } from "./Dock";
 import { StatusBar } from "../phone/StatusBar";
-import { HOME_PAGES, getAppById } from "../../config/apps";
+import { HOME_PAGES, getAppById, AppId } from "../../config/apps";
 import { SettingsPanel } from "../settings/SettingsPanel";
+import { AppStoreScreen } from "../store/AppStoreScreen";
+import type { InstalledApp } from "../../services/appStoreService";
 
 type HomeView = "home" | "phone" | "store" | "settings";
 
@@ -14,6 +16,8 @@ interface HomeScreenProps {
   onThemeChange: (theme: Theme) => void;
   iconAssignments: IconAssignments;
   onIconAssignmentsChange: (next: IconAssignments) => void;
+  installedApps: InstalledApp[];
+  onInstalledAppsChange: (apps: InstalledApp[]) => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -22,13 +26,28 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onThemeChange,
   iconAssignments,
   onIconAssignmentsChange,
+  installedApps,
+  onInstalledAppsChange,
 }) => {
   const [view, setView] = useState<HomeView>("home");
   const [page, setPage] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [mouseStartX, setMouseStartX] = useState<number | null>(null);
 
-  const maxPage = HOME_PAGES.length - 1;
+  // Build pages dynamically: core pages + installed apps split in rows of 4
+  const corePages: AppId[][] = HOME_PAGES;
+  const installedIds: AppId[] = installedApps.map((a) => a.id);
+  const installedPages: AppId[][] = [];
+
+  if (installedIds.length) {
+    const chunkSize = 4;
+    for (let i = 0; i < installedIds.length; i += chunkSize) {
+      installedPages.push(installedIds.slice(i, i + chunkSize));
+    }
+  }
+
+  const allPages: AppId[][] = [...corePages, ...installedPages];
+  const maxPage = allPages.length - 1;
 
   const openPhone = () => setView("phone");
   const openStore = () => setView("store");
@@ -87,24 +106,30 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           className="lp-home-grid-strip"
           style={{ transform: `translateX(-${page * 100}%)` }}
         >
-          {HOME_PAGES.map((appIds, idx) => (
+          {allPages.map((appIds, idx) => (
             <div key={idx} className="lp-home-grid">
               {appIds.map((appId) => {
-                const app = getAppById(appId);
-                const assignedIcon = iconAssignments[app.id];
-                const iconSrc = assignedIcon || app.icons?.[0];
+                const coreApp = getAppById(appId);
+                const installedApp = installedApps.find((a) => a.id === appId);
+
+                const label = coreApp?.label ?? installedApp?.label ?? appId;
+                const emoji = coreApp?.emoji;
+                const assignedIcon = iconAssignments[appId];
+                const iconSrc =
+                  assignedIcon || coreApp?.icons?.[0] || installedApp?.icon;
 
                 const handleAppClick = () => {
-                  if (app.id === "prank-dialer") openPhone();
-                  else if (app.id === "settings") openSettings();
-                  else if (app.id === "hub") openStore();
+                  if (appId === "prank-dialer") openPhone();
+                  else if (appId === "settings") openSettings();
+                  else if (appId === "hub") openStore();
+                  // User apps can later open custom runtimes
                 };
 
                 return (
                   <AppIcon
-                    key={app.id}
-                    label={app.label}
-                    emoji={app.emoji}
+                    key={appId}
+                    label={label}
+                    emoji={emoji}
                     iconSrc={iconSrc}
                     onClick={handleAppClick}
                   />
@@ -116,7 +141,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       </div>
 
       <div className="lp-home-page-dots">
-        {HOME_PAGES.map((_, i) => (
+        {allPages.map((_, i) => (
           <button
             key={i}
             className={
@@ -165,10 +190,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <span>Lazy Store</span>
             <span className="lp-app-header-spacer" />
           </div>
-          <p className="lp-app-body">
-            Future: upload custom apps, install/uninstall, app permissions, app
-            versions. Right now it's just here to vibe.
-          </p>
+          <AppStoreScreen
+            installedApps={installedApps}
+            onInstalledAppsChange={onInstalledAppsChange}
+          />
         </div>
       )}
 
