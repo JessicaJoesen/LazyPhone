@@ -1,4 +1,14 @@
-export type AppId = string;
+export type AppId =
+  | "lazy-map"
+  | "prank-dialer"
+  | "notes"
+  | "toto-cam"
+  | "tasks"
+  | "journal"
+  | "hub"
+  | "settings"
+  | "calendar"
+  | "photos";
 
 export type AppConfig = {
   id: AppId;
@@ -10,7 +20,6 @@ export type AppConfig = {
   icons?: string[];
 };
 
-// Core/system apps that ship with LazyPhone
 export const APPS: AppConfig[] = [
   {
     id: "lazy-map",
@@ -72,22 +81,19 @@ export const APPS: AppConfig[] = [
     emoji: "📷",
     icons: ["/icons/delta/photos.png"],
   },
-  {
-    id: "messages",
-    label: "Messages",
-    emoji: "💬",
-    icons: ["/icons/delta/messages.png"],
-  },
 ];
 
-// Define which core apps appear on which home screen page.
-// User-installed apps will be appended after these.
+// Define which apps appear on which home screen page
 export const HOME_PAGES: AppId[][] = [
   ["lazy-map", "prank-dialer", "notes", "toto-cam"],
   ["tasks", "journal", "hub", "settings"],
-  ["calendar", "photos", "messages"],
+  ["calendar", "photos"],
 ];
 
-export function getAppById(id: AppId): AppConfig | undefined {
-  return APPS.find((a) => a.id === id);
+export function getAppById(id: AppId): AppConfig {
+  const app = APPS.find((a) => a.id === id);
+  if (!app) {
+    throw new Error("Unknown app id: " + id);
+  }
+  return app;
 }
